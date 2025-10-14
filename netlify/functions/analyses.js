@@ -10,6 +10,10 @@ const {
 } = require('@aws-sdk/lib-dynamodb');
 
 // Configurar cliente DynamoDB
+console.log('🔧 Configurando DynamoDB...');
+console.log('Region:', process.env.MY_AWS_REGION || process.env.AWS_REGION || 'us-east-1');
+console.log('Access Key exists:', !!process.env.MY_AWS_ACCESS_KEY_ID || !!process.env.AWS_ACCESS_KEY_ID);
+
 const client = new DynamoDBClient({
   region: process.env.MY_AWS_REGION || process.env.AWS_REGION || 'us-east-1',
   credentials: {
@@ -123,6 +127,7 @@ exports.handler = async (event) => {
 
     // POST /api/analyses - Criar nova análise
     if (method === 'POST') {
+      console.log('💾 Salvando análise...');
       const data = JSON.parse(event.body);
       
       // Gerar ID se não existir
@@ -133,12 +138,16 @@ exports.handler = async (event) => {
       // Adicionar timestamp
       data.createdAt = new Date().toISOString();
       
+      console.log('📝 Dados:', { id: data.id, cnpj: data.cnpj });
+      
       const command = new PutCommand({
         TableName: TABLE_NAME,
         Item: data,
       });
       
+      console.log('🚀 Enviando para DynamoDB...');
       await docClient.send(command);
+      console.log('✅ Salvo com sucesso!');
       
       return {
         statusCode: 201,
