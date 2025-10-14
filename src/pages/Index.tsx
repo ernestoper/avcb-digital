@@ -1,13 +1,20 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CNPJForm } from '@/components/CNPJForm';
 import { CompanyInfo } from '@/components/CompanyInfo';
 import { RiskAnalysis } from '@/components/RiskAnalysis';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { LogOut, LayoutDashboard, User } from 'lucide-react';
+import { auth } from '@/lib/auth';
 import cbmpeLogo from '@/assets/cbmpe-logo.png';
 
 const Index = () => {
   const [step, setStep] = useState<'form' | 'company-info' | 'analysis'>('form');
   const [companyData, setCompanyData] = useState(null);
+  const navigate = useNavigate();
+  const user = auth.getCurrentUser();
+  const isAdmin = auth.isAdmin();
 
   const handleCNPJSubmit = (data: any) => {
     setCompanyData(data);
@@ -44,11 +51,34 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <a href="/dashboard" className="hidden md:block">
-              <Button variant="outline">
-                Ver Dashboard
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-2 text-sm">
+                <User className="h-4 w-4" />
+                <span>{user?.name}</span>
+                <Badge variant={isAdmin ? "default" : "secondary"}>
+                  {isAdmin ? 'Admin' : 'Usuário'}
+                </Badge>
+              </div>
+              {isAdmin && (
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate('/dashboard')}
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </Button>
+              )}
+              <Button 
+                variant="outline" 
+                onClick={() => {
+                  auth.logout();
+                  navigate('/login');
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Sair
               </Button>
-            </a>
+            </div>
           </div>
         </div>
       </header>

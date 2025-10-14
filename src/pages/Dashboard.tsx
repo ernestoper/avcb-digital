@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { db, CompanyAnalysis } from '@/lib/database';
 import { generateCertificatePDF } from '@/lib/certificate';
 import { seedDatabase, clearDatabase } from '@/lib/seedData';
+import { auth } from '@/lib/auth';
 import { 
   Building2, 
   FileText, 
@@ -19,15 +21,18 @@ import {
   PieChart,
   Home,
   Database,
-  RefreshCw
+  RefreshCw,
+  LogOut,
+  User
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import cbmpeLogo from '@/assets/cbmpe-logo.png';
 
 export default function Dashboard() {
   const [analyses, setAnalyses] = useState<CompanyAnalysis[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [filter, setFilter] = useState<'all' | 'aprovado' | 'pendente' | 'reprovado'>('all');
+  const navigate = useNavigate();
+  const user = auth.getCurrentUser();
 
   useEffect(() => {
     loadData();
@@ -99,12 +104,30 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <Link to="/">
-              <Button variant="outline">
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-2 text-sm">
+                <User className="h-4 w-4" />
+                <span>{user?.name}</span>
+                <Badge variant="default">Admin</Badge>
+              </div>
+              <Button 
+                variant="outline"
+                onClick={() => navigate('/')}
+              >
                 <Home className="h-4 w-4" />
-                Voltar ao Início
+                Início
               </Button>
-            </Link>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  auth.logout();
+                  navigate('/login');
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                Sair
+              </Button>
+            </div>
           </div>
         </div>
       </header>
